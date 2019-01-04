@@ -1,5 +1,5 @@
 import asyncio
-import csv2json
+import gpm_file_parser
 import json
 import logging
 import os
@@ -7,22 +7,13 @@ import queue
 import requests
 import threading
 
-class Song:
-    def __init__(self, title, artist, album):
-        self._title = title
-        self._artist = artist
-        self._album = album
-
-    def __str__(self):
-        return f"{self._title} - {self._album} by {self._artist}"
-
-
-class GpmFileParser:
+class Gpm2Spotify:
     def __init__(self, filepath="", authorization_header=""):
         self._filepath = "/Users/aman23091998/Downloads/Takeout/Google Play Music"
         self._auth_header = authorization_header
         self._songs = dict()
-        self._parserLock = asyncio.Lock()
+        self._parser_lock = asyncio.Lock()
+        self._gpm_file_parser = gpm_file_parser.GpmFileParser()
 
     def _get_song_id(self, song):
         spotify_get_song_info_endpoint = "https://api.spotify.com/v1/search"
@@ -80,14 +71,10 @@ class GpmFileParser:
                 ]
 
         for file in files:
-            try:
-                song = csv2json.csv2json(os.path.join(tracks_filepath, file))
-                song = json.loads(song)[0]
-           
-                read_queue.put(Song(song["Title"], song["Artist"], song["Album"]))
-            except Exception as e:
-                logging.exception(f"Can't parse {file}")
-       
+             read_queue.put(
+                     self._gpm_file_parser.parse_file(os.path.join(tracks_filepath, file))
+                     )
+
         for x in range(thread_count):
             read_queue.put(None)
 
@@ -104,7 +91,7 @@ class GpmFileParser:
     async def _parse_library(self):
         tracks_filepath = self._filepath + "/Playlists/Thumbs Up/"
         
-        async with self._parserLock:
+        async with self._parser_lock:
             await self._parse_song_files(tracks_filepath, self._post_library)
 
     def parse_songs():
