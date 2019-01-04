@@ -45,11 +45,11 @@ class GpmFileParser:
             return None
 
 
-    def _add_songs_to_spotify_thread(self, readQueue, callback):
+    def _add_songs_to_spotify_thread(self, read_queue, callback):
         song_ids = []
         
         while True:
-            song = readQueue.get()
+            song = read_queue.get()
             if not song:
                 break
            
@@ -66,7 +66,7 @@ class GpmFileParser:
     async def _parse_song_files(self, tracks_filepath, callback):
         files = os.listdir(tracks_filepath)
 
-        readQueue = queue.Queue() # Files read from tracks_filepath
+        read_queue = queue.Queue() # Files read from tracks_filepath
         thread_count = max(10, (len(files) / 50))
 
         loop = asyncio.get_event_loop()
@@ -74,7 +74,7 @@ class GpmFileParser:
                 loop.run_in_executor(
                     None, 
                     self._add_songs_to_spotify_thread,
-                    readQueue,
+                    read_queue,
                     callback
                     )
                 ]
@@ -84,12 +84,12 @@ class GpmFileParser:
                 song = csv2json.csv2json(os.path.join(tracks_filepath, file))
                 song = json.loads(song)[0]
            
-                readQueue.put(Song(song["Title"], song["Artist"], song["Album"]))
+                read_queue.put(Song(song["Title"], song["Artist"], song["Album"]))
             except Exception as e:
                 logging.exception(f"Can't parse {file}")
        
         for x in range(thread_count):
-            readQueue.put(None)
+            read_queue.put(None)
 
         for response in await asyncio.gather(*futures):
             pass
