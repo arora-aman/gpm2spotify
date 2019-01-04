@@ -14,6 +14,21 @@ class Song:
         return f"{self._title} - {self._album} by {self._artist}"
 
 
+    @property
+    def title(self):
+        return self._title
+
+
+    @property
+    def artist(self):
+        return self._artist
+
+
+    @property
+    def album(self):
+        return self._album
+
+
 class GpmFileParser:
     
     def _csv2json(self, csv_file):

@@ -17,9 +17,9 @@ class Gpm2Spotify:
 
     def _get_song_id(self, song):
         spotify_get_song_info_endpoint = "https://api.spotify.com/v1/search"
-        query_track = f"{song._title}"
-        query_album = f"album:{song._album}"
-        query_artist = f"artist:{song._artist}"
+        query_track = f"{song.title}"
+        query_album = f"album:{song.album}"
+        query_artist = f"artist:{song.artist}"
 
         query = f"?q={query_track} {query_album} {query_artist}&type=track"
         try:
@@ -50,7 +50,7 @@ class Gpm2Spotify:
             id = self._songs[song]
             if id:
                 song_ids.append(id)
-                print(f"{song._title} found at https://open.spotify.com/track/{id}")
+                print(f"{song.title} found at https://open.spotify.com/track/{id}")
 
         callback(song_ids)
 
