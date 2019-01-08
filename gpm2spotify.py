@@ -8,18 +8,12 @@ import song_finder
 import threading
 
 class Gpm2Spotify:
-    def __init__(self, filepath="", authorization_header="", logger = None):
+    def __init__(self, filepath="", authorization_header=""):
         self._filepath = "/Users/aman23091998/Downloads/Takeout/Google Play Music"
         self._song_finder = song_finder.SongFinder(authorization_header)
         self._parser_lock = asyncio.Lock()
         self._gpm_file_parser = gpm_file_parser.GpmFileParser()
-        self._logger = logger
-        
-        if not self._logger:
-            print("meow'")
-            self._logger = logging.getLogger("gpm2spotify")
-        self._logger.setLevel(logging.DEBUG)
-
+        self._logger = logging.getLogger("gpm2spotify")
 
     def _add_songs_to_spotify_thread(self, read_queue, add_to_spotify):
         """Thread to batch add songs to spotify
