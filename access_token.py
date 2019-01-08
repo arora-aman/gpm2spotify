@@ -5,6 +5,12 @@ import requests
 
 
 def get_access_token(client_id, client_secret):
+    """Gets a new access token from spotify
+    :param client_id: String, Spotify Application client id
+    :param client_secret: String, Sptify Application client secret
+
+    :returns: String, Spotify access token
+    """
     auth_code = f"{client_id}:{client_secret}"
     encoded_auth_code = base64.standard_b64encode(bytearray(auth_code, 'utf-8')).decode("utf-8")
    

@@ -15,11 +15,15 @@ class Gpm2Spotify:
         self._gpm_file_parser = gpm_file_parser.GpmFileParser()
 
 
-    def _add_songs_to_spotify_thread(self, read_queue, callback):
+    def _add_songs_to_spotify_thread(self, read_queue, add_to_spotify):
+        """Thread to batch add songs to spotify
+        :param read_queue: Queue, Contians songs that need to be added to spotify
+        :param add_to_spotify: Function(ids), Add upto 50 ids to spotify. Function handles
+                               library or playlist.
+        """
         song_ids = []
 
         while True:
-        #while len(song_ids) < 50:
             song = read_queue.get()
 
             if not song:
@@ -31,14 +35,19 @@ class Gpm2Spotify:
                 song_ids.append(id)
                 logging.debug(f"{song.title} found at https://open.spotify.com/track/{id}")
 
-        callback(song_ids)
+        add_to_spotify(song_ids)
 
 
-    async def _parse_song_files(self, tracks_filepath, callback):
+    async def _parse_song_files(self, tracks_filepath, add_to_spotify):
+        """Reads songs from Google Takeout and adds them to spotify
+        :param tracks_filepath: Path to songs that need to be added
+        :param add_to_spotify: Function(ids), Add upto 50 ids to spotify. Function handles
+                               library or playlist.
+        """
         files = os.listdir(tracks_filepath)
 
         read_queue = queue.Queue() # Files read from tracks_filepath
-        
+
         thread_count = 2 # Anything greater gets rate limited by Spotify
 
         loop = asyncio.get_event_loop()
@@ -47,7 +56,7 @@ class Gpm2Spotify:
                     None,
                     self._add_songs_to_spotify_thread,
                     read_queue,
-                    callback
+                    add_to_spotify
                     )
                 ]
 
@@ -64,6 +73,9 @@ class Gpm2Spotify:
 
 
     def _post_library(self, song_ids_list):
+        """Adds songs to Spotify Library
+        :param song_ids_list: Array of ids, (Max 50) ids of songs that need to be added to the library
+        """
         if len(song_ids_list) > 50:
             logging.error(f"ID list should be less than 50, found:{len(song_ids_list)}, handling gracefully...")
         return
@@ -71,7 +83,9 @@ class Gpm2Spotify:
         logging.debug(f"Found {len(song_ids_list)} id")
 
 
-    async def _parse_library(self):
+    async def parse_library(self):
+        """Adds songs from GPM to spotify library
+        """
         tracks_filepath = self._filepath + "/Playlists/Thumbs Up/"
 
         async with self._parser_lock:
