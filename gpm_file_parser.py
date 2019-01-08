@@ -40,8 +40,6 @@ class GpmFileParser:
         """
         with open(csv_file, "r") as csv_file_handle:
             reader = csv.DictReader(csv_file_handle)
-            #print([row for row in reader])
-            #exit()
             return json.dumps([row for row in reader])
 
 

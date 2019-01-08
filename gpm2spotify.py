@@ -18,7 +18,8 @@ class Gpm2Spotify:
     def _add_songs_to_spotify_thread(self, read_queue, callback):
         song_ids = []
 
-        while len(song_ids) < 50:
+        while True:
+        #while len(song_ids) < 50:
             song = read_queue.get()
 
             if not song:
@@ -28,15 +29,17 @@ class Gpm2Spotify:
 
             if id:
                 song_ids.append(id)
-                print(f"{song.title} found at https://open.spotify.com/track/{id}")
+                logging.debug(f"{song.title} found at https://open.spotify.com/track/{id}")
 
         callback(song_ids)
+
 
     async def _parse_song_files(self, tracks_filepath, callback):
         files = os.listdir(tracks_filepath)
 
         read_queue = queue.Queue() # Files read from tracks_filepath
-        thread_count = max(10, (len(files) / 50))
+        
+        thread_count = 2 # Anything greater gets rate limited by Spotify
 
         loop = asyncio.get_event_loop()
         futures = [
@@ -46,8 +49,6 @@ class Gpm2Spotify:
                     read_queue,
                     callback
                     )
-
-                #for x in range(thread_count)
                 ]
 
         for file in files:
@@ -61,19 +62,18 @@ class Gpm2Spotify:
         for response in await asyncio.gather(*futures):
             pass
 
+
     def _post_library(self, song_ids_list):
         if len(song_ids_list) > 50:
             logging.error(f"ID list should be less than 50, found:{len(song_ids_list)}, handling gracefully...")
         return
 
-        print(f"Found {len(song_ids_list)} id")
+        logging.debug(f"Found {len(song_ids_list)} id")
+
 
     async def _parse_library(self):
         tracks_filepath = self._filepath + "/Playlists/Thumbs Up/"
 
         async with self._parser_lock:
             await self._parse_song_files(tracks_filepath, self._post_library)
-
-    def parse_songs():
-        return None
 
