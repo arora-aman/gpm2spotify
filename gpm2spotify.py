@@ -80,9 +80,10 @@ class Gpm2Spotify:
         """Adds songs to Spotify Library
         :param song_ids_list: Array of ids, (Max 50) ids of songs that need to be added to the library
         """
+
         if len(song_ids_list) > 50:
             self._logger.error(f"ID list should be less than 50, found:{len(song_ids_list)}, handling gracefully...")
-        return
+            return
 
         self._logger.info(f"Found {len(song_ids_list)} id")
 
