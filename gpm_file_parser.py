@@ -30,7 +30,9 @@ class Song:
 
 
 class GpmFileParser:
-    
+    def __init__(self):
+        self._logger = logging.getLogger("gpm2spotify")
+
     def _csv2json(self, csv_file):
         """Converts a CSV file to JSON object
         :param csv_file: String, File Path to the CSV file
@@ -55,4 +57,4 @@ class GpmFileParser:
                 )
         
         except Exception as e:
-            logging.exception(f"Can't parse {csv_file}")
+            self._logger.exception(f"Can't parse {csv_file}")

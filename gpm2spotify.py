@@ -8,11 +8,17 @@ import song_finder
 import threading
 
 class Gpm2Spotify:
-    def __init__(self, filepath="", authorization_header=""):
+    def __init__(self, filepath="", authorization_header="", logger = None):
         self._filepath = "/Users/aman23091998/Downloads/Takeout/Google Play Music"
         self._song_finder = song_finder.SongFinder(authorization_header)
         self._parser_lock = asyncio.Lock()
         self._gpm_file_parser = gpm_file_parser.GpmFileParser()
+        self._logger = logger
+        
+        if not self._logger:
+            print("meow'")
+            self._logger = logging.getLogger("gpm2spotify")
+        self._logger.setLevel(logging.DEBUG)
 
 
     def _add_songs_to_spotify_thread(self, read_queue, add_to_spotify):
@@ -24,6 +30,10 @@ class Gpm2Spotify:
         song_ids = []
 
         while True:
+            if len(song_ids) == 50:
+                add_to_spotify(song_ids)
+                song_ids = []
+            
             song = read_queue.get()
 
             if not song:
@@ -33,7 +43,7 @@ class Gpm2Spotify:
 
             if id:
                 song_ids.append(id)
-                logging.debug(f"{song.title} found at https://open.spotify.com/track/{id}")
+                self._logger.debug(f"{song.title} found at https://open.spotify.com/track/{id}")
 
         add_to_spotify(song_ids)
 
@@ -77,10 +87,10 @@ class Gpm2Spotify:
         :param song_ids_list: Array of ids, (Max 50) ids of songs that need to be added to the library
         """
         if len(song_ids_list) > 50:
-            logging.error(f"ID list should be less than 50, found:{len(song_ids_list)}, handling gracefully...")
+            self._logger.error(f"ID list should be less than 50, found:{len(song_ids_list)}, handling gracefully...")
         return
 
-        logging.debug(f"Found {len(song_ids_list)} id")
+        self._logger.info(f"Found {len(song_ids_list)} id")
 
 
     async def parse_library(self):

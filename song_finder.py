@@ -7,6 +7,7 @@ class SongFinder:
     def __init__(self, authorization_header):
         self._auth_header = authorization_header
         self._songs = dict()
+        self._logger = logging.getLogger("gpm2spotify")
 
 
     def _search_song(self, query_track, query_album="", query_artist=""):
@@ -25,7 +26,7 @@ class SongFinder:
             resp = requests.get(spotify_get_song_info_endpoint + "?q=" + query, headers=self._auth_header)
 
             if not resp.ok:
-                logging.debug(
+                self._logger.debug(
                         f"Query={query} failed"
                         f" errcode={resp.status_code}"
                         f" errmsg={resp.content}"
@@ -38,9 +39,9 @@ class SongFinder:
             if len(songs) > 0:
                 return songs[0]
 
-            logging.debug(f"Song not found for query={query}")
+            self._logger.debug(f"Song not found for query={query}")
         except Exception as e:
-            logging.exception(f"query={query} failed")
+            self._logger.exception(f"query={query} failed")
 
 
     def _get_song(self, query_song):
@@ -89,7 +90,7 @@ class SongFinder:
                 "exact": False,
         }
 
-        logging.error(f"Couldn't find {query_song} on Spotify")
+        self._logger.error(f"Couldn't find {query_song} on Spotify")
 
     def get_song_id(self, song):
         """Searches for a specific song on spotify
