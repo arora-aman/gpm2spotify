@@ -3,6 +3,7 @@ import access_token
 import gpm2spotify
 import logging
 
+
 def config_logger():
     """Configures a logger for the app
     """
@@ -18,6 +19,7 @@ def config_logger():
     logger = logging.getLogger("gpm2spotify")
     logger.handlers = [file_handler,]
     logger.setLevel(logging.INFO)
+
 
 def main():
     config_logger()

@@ -92,6 +92,7 @@ class SongFinder:
 
         self._logger.error(f"Couldn't find {query_song} on Spotify")
 
+
     def get_song_id(self, song):
         """Searches for a specific song on spotify
         :param song: Song, Song to be searched for

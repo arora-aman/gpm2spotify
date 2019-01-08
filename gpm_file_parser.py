@@ -10,6 +10,7 @@ class Song:
         self._artist = artist
         self._album = album
 
+
     def __str__(self):
         return f"{self._title} - {self._album} by {self._artist}"
 
@@ -32,6 +33,7 @@ class Song:
 class GpmFileParser:
     def __init__(self):
         self._logger = logging.getLogger("gpm2spotify")
+
 
     def _csv2json(self, csv_file):
         """Converts a CSV file to JSON object
