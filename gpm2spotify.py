@@ -64,6 +64,8 @@ class Gpm2Spotify:
                     read_queue,
                     add_to_spotify
                     )
+
+                    for x in range(thread_count)
                 ]
 
         for file in files:
