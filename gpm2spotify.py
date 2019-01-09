@@ -5,6 +5,7 @@ import logging
 import os
 import queue
 import song_finder
+import spotify_song_adder
 import threading
 
 
@@ -12,6 +13,7 @@ class Gpm2Spotify:
     def __init__(self, filepath="", authorization_header=""):
         self._filepath = "/Users/aman23091998/Downloads/Takeout/Google Play Music"
         self._song_finder = song_finder.SongFinder(authorization_header)
+        self._spotify_adder = spotify_song_adder.SpotifyAdder(authorization_header)
         self._parser_lock = asyncio.Lock()
         self._gpm_file_parser = gpm_file_parser.GpmFileParser()
         self._logger = logging.getLogger("gpm2spotify")
@@ -89,7 +91,10 @@ class Gpm2Spotify:
             self._logger.error(f"ID list should be less than 50, found:{len(song_ids_list)}, handling gracefully...")
             return
 
-        self._logger.info(f"Found {len(song_ids_list)} id")
+        if  self._spotify_adder.add_to_library(song_ids_list):
+            self._logger.info(f"Added {len(song_ids_list)} songs to library")
+        else:
+            self._logger.error(f"Failed to add {len(song_ids_list)} to library")
 
 
     async def parse_library(self):
