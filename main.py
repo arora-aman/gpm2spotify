@@ -1,8 +1,17 @@
 import asyncio
+import auth_api
 import access_token
 import gpm2spotify
 import logging
 
+from flask import Flask, request
+
+
+app = Flask(
+    __name__,
+)
+
+app.register_blueprint(auth_api.auth_api)
 
 def config_logger():
     """Configures a logger for the app
@@ -24,6 +33,8 @@ def config_logger():
 def main():
     config_logger()
 
+    app.run(host="localhost", port=8000)
+
     token = access_token.get_access_token("", "")
 
     if not token:
@@ -36,6 +47,7 @@ def main():
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(parser.parse_library())
+
 
 if __name__ == "__main__":
     main()
