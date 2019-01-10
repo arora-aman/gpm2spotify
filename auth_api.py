@@ -1,4 +1,4 @@
-import access_token
+import client
 
 from flask import Blueprint, current_app, jsonify, redirect, request, url_for
 
@@ -63,9 +63,9 @@ def login_create():
     global spotify_client
     global spotify_user
     
-    spotify_client= access_token.SpotifyClient(request.form["client_id"], request.form["client_secret"])
+    spotify_client = client.SpotifyClient(request.form["client_id"], request.form["client_secret"])
 
-    spotify_user = access_token.SpotifyUser(spotify_client, "http://localhost:8000")
+    spotify_user = client.SpotifyUser(spotify_client, "http://localhost:8000")
     spotify_user.get_access_token()
 
     return"""

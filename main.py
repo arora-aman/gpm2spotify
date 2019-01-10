@@ -1,5 +1,4 @@
 import asyncio
-import access_token
 import auth_api
 import gpm2spotify
 import logging
