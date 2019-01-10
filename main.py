@@ -1,8 +1,9 @@
 import asyncio
-import auth_api
 import access_token
+import auth_api
 import gpm2spotify
 import logging
+import sys
 
 from flask import Flask, request
 
@@ -33,20 +34,20 @@ def config_logger():
 def main():
     config_logger()
 
-    app.run(host="localhost", port=8000)
+    app.run(host="localhost", port=8000, threaded=True)
 
-    token = access_token.get_access_token("", "")
+    # token = access_token.get_access_token(sys.argv[1], sys.argv[2])
 
-    if not token:
-        raise RuntimeError("Access Token Not Available")
+    # if not token:
+    #     raise RuntimeError("Access Token Not Available")
 
-    auth_header = {
-        "Authorization": f"Bearer {token}"
-    }
-    parser = gpm2spotify.Gpm2Spotify("", auth_header)
+    # auth_header = {
+    #     "Authorization": f"Bearer {token}"
+    # }
+    # parser = gpm2spotify.Gpm2Spotify("", auth_header)
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(parser.parse_library())
+    # loop = asyncio.get_event_loop()
+    # loop.run_until_complete(parser.parse_library())
 
 
 if __name__ == "__main__":
