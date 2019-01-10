@@ -18,7 +18,7 @@ class SpotifyClient:
 
     def authorization_header(self):
         """Header required to make unscoped requests
-        :returns: Dictionary, containing authorization information 
+        :returns: Dictionary, containing authorization information
         """
         client_credentials = f"{self._client_id}:{self._client_secret}"
         encoded_client_credentials = base64.standard_b64encode(bytearray(client_credentials, 'utf-8')).decode("utf-8")
@@ -67,7 +67,7 @@ class SpotifyUser:
         self._logger = logging.getLogger("gpm2spotify")
 
 
-    def _make_request(self, method, endpoint, data=None):
+    def make_request(self, method, endpoint, data=None):
         """Makes a request with user authorisation
         :param method: String, "GET" or "PUT" or "POST" or "PATCH"
         :param endpoint: String, endpoint to make the request
@@ -99,7 +99,7 @@ class SpotifyUser:
         :return: Bool, True if the user was comepletely authenicated
         """
         if not code:
-            self._logger.error(f"Authorization request failed: {error}")
+            self._logger.error(f"User authorization request failed: {error}")
             self._auth_wait_sem.release()
             return False
 
@@ -136,35 +136,42 @@ class SpotifyUser:
         self._access_token = resp["access_token"]
         return True
 
+class SpotifApplication:
+    def __init__(self, spotify_client):
+        self._client = spotify_client
+        self._logger = logging.getLogger("gpm2spotify")
 
-def get_app_access_token(client_id, client_secret):
-    """Gets a new access token from spotify for the unscoped data
-    :param client_id: String, Spotify Application client id
-    :param client_secret: String, Sptify Application client secret
+    def make_request(self, method, endpoint, data=None):
+        """Makes a request to unscoped data
+        :param method: String, "GET" or "PUT" or "POST" or "PATCH"
+        :param endpoint: String, endpoint to make the request
+        :param data: Dictionary, data to me appeneded to the request
+        """
+        if not self._access_token:
+            raise RuntimeError("User access token not found")
 
-    :returns: String, Spotify access token
-    """
+        headers = {
+            "Authorization": f"Bearer {self._access_token}"
+        }
 
-    logger = logging.getLogger("gpm2spotify")
+        return self._client.make_request(method, endpoint, headers, data)
 
-    client_credentials = f"{client_id}:{client_secret}"
-    encoded_client_credentials = base64.standard_b64encode(bytearray(client_credentials, 'utf-8')).decode("utf-8")
+    def get_access_token(self):
+        """Gets a new access token from spotify for the unscoped data
+        :returns: Bool, True if the access token is successfully retrieved
+        """
 
-    headers = {
-        "Authorization": f"Basic {encoded_auth_code}",
-    }
+        spotify_access_token_endpoint = "https://accounts.spotify.com/api/token"
+        data = {
+            "grant_type": "client_credentials",
+        }
 
-    spotify_access_token_endpoint = "https://accounts.spotify.com/api/token"
+        resp = self._client.make_request("POST", spotify_access_token_endpoint, self._client.authorization_header(), data)
 
-    data = {
-        "grant_type": "client_credentials",
-    }
+        if not resp:
+            logger.error("Failed to get app access token")
+            return False
 
-    try:
-        resp = requests.post(spotify_access_token_endpoint, headers=headers, data=data)
-        if not resp.ok:
-            logger.error(resp.reason, resp.content, resp.status_code)
-        return json.loads(resp.content.decode())["access_token"]
-    except Exception:
-        logger.exception("Failed to get access token")
+        self._access_token = resp["access_token"]
 
+        return True
