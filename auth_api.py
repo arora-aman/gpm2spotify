@@ -7,6 +7,7 @@ auth_api = Blueprint("auth", __name__, url_prefix="")
 
 spotify_client = None
 spotify_user = None
+spotify_app = None
 
 @auth_api.route("/on_auth", methods=["GET"])
 def on_authenticated():
@@ -62,8 +63,22 @@ def login_create():
     """
     global spotify_client
     global spotify_user
+    global spotify_app
     
     spotify_client = client.SpotifyClient(request.form["client_id"], request.form["client_secret"])
+
+    spotify_app = client.SpotifApplication(spotify_client)
+    valid_client_creds = spotify_app.get_access_token()
+
+    if not valid_client_creds:
+        return """
+        <html>
+            <body>
+                An error occured, make sure that the credentials are correct <br />
+                <a href={url_for("auth.login_show")}> Click here to retry</a>
+            </body>
+        </html>
+        """, 401
 
     spotify_user = client.SpotifyUser(spotify_client, "http://localhost:8000")
     spotify_user.get_access_token()

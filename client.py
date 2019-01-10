@@ -52,6 +52,8 @@ class SpotifyClient:
                         f" errcode={resp.status_code}"
                         f" errmsg={resp.content}"
                     )
+                return None
+
             return json.loads(resp.content.decode())
         except Exception:
             self._logger.exception(f"{method} {endpoint} Failed data={data}")
@@ -169,7 +171,7 @@ class SpotifApplication:
         resp = self._client.make_request("POST", spotify_access_token_endpoint, self._client.authorization_header(), data)
 
         if not resp:
-            logger.error("Failed to get app access token")
+            self._logger.error("Failed to get app access token")
             return False
 
         self._access_token = resp["access_token"]
