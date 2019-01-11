@@ -84,15 +84,23 @@ class Gpm2Spotify:
         :param song_ids_list: Array of ids, (Max 50) ids of songs that need to be added to the library
         """
 
-        if len(song_ids_list) > 50:
-            self._logger.error(f"ID list should be less than 50, found:{len(song_ids_list)}, handling gracefully...")
+        song_count = len(song_ids_list)
+
+        if song_count == 0:
             return
 
-        if  self._spotify_adder.add_to_library(song_ids_list):
-            self._logger.info(f"Added {len(song_ids_list)} songs to library")
-        else:
-            self._logger.error(f"Failed to add {len(song_ids_list)} to library")
+        if song_count > 50:
+            self._logger.info(f"ID list should be less than 50, found:{song_count}, handling gracefully...")
 
+        while song_count > 0:
+            selected = 50 if song_count >= 50 else song_count
+
+            if  self._spotify_adder.add_to_library(song_ids_list[song_count - selected: song_count -1]):
+                self._logger.info(f"Added {selected} songs to library")
+            else:
+                self._logger.error(f"Failed to add {song_count} to library")
+
+            song_count -= selected
 
     def parse_library(self):
         """Adds songs from GPM to spotify library
