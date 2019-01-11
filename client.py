@@ -129,7 +129,7 @@ class SpotifyUser:
         spotify_access_token_endpoint = "https://accounts.spotify.com/api/token"
 
         data = {
-            "grant_type": "client_credentials",
+            "grant_type": "authorization_code",
             "code": self._auth_code,
             "redirect_uri": f"{self._flask_server}/on_auth"
         }
