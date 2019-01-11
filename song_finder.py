@@ -18,7 +18,6 @@ class SongFinder:
         :param query_artist: String, Formatted as "artist:{specific artist}"
 
         :returns: dict, Response to the query
-
         """
         spotify_get_song_info_endpoint = "https://api.spotify.com/v1/search"
         query = f"{query_track} {query_album} {query_artist}"
@@ -48,7 +47,6 @@ class SongFinder:
 
         :return: JSON Object, returns the query result back
         """
-
         self._songs[query_song] = {
                 "song": song,
                 "exact": exact,
@@ -66,7 +64,6 @@ class SongFinder:
         :param query_song: Song, Song to be searched for
 
         :returns: JSON Object, The song with the closest match
-
         """
         if query_song in self._songs:
             return self._songs[query_song]["song"]
@@ -80,12 +77,12 @@ class SongFinder:
         if song:
             return self._add_song_to_dict(query_song, song)
 
-        song =  self._search_song(query_track, query_album=query_album)
+        song =  self._search_song(query_track, query_artist=query_artist)
 
         if song:
             return self._add_song_to_dict(query_song, song, False)
 
-        song =  self._search_song(query_track, query_artist=query_artist)
+        song =  self._search_song(query_track, query_album=query_album)
 
         if song:
             return self._add_song_to_dict(query_song, song, False)
@@ -101,7 +98,6 @@ class SongFinder:
         :param song: Song, Song to be searched for
 
         :returns: JSON Object, The ID of the song with the closest match
-
         """
         result = self._get_song(song)
 
