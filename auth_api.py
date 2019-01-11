@@ -29,7 +29,8 @@ def on_authenticated():
         )
 
     if success:
-       start_parser()
+        parser_thread = threading.Thread(target=start_parser)
+        parser_thread.start()
 
     on_success = """
     <html>
