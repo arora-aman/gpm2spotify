@@ -52,13 +52,13 @@ class SpotifyClient:
                 if resp.status_code == 429:
                     time.sleep(int(resp.headers["Retry-After"]))
                     return self.make_request(method, endpoint, headers, data, json_data)
-                else:
-                    self._logger.exception(
-                        f"{method} {endpoint} Failed"
-                        f" data={data}"
-                        f" errcode={resp.status_code}"
-                        f" errmsg={resp.content}"
-                    )
+
+                self._logger.error(
+                    f"{method} {endpoint} Failed"
+                    f" data={data}"
+                    f" errcode={resp.status_code}"
+                    f" errmsg={resp.content}"
+                )
                 return None
 
             content = resp.content.decode()
