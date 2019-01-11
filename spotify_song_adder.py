@@ -13,17 +13,12 @@ class SpotifyAdder:
         :param song_ids: Array of Strings, (Max 50) List of song ids that are added to Spotify Library.
         """
         endpoint = "https://api.spotify.com/v1/me/tracks"
-        #concatenated_ids = ",".join(song_ids)
-
-        data = {
-            "ids": song_ids 
-        }
 
         try:
-            resp = requests.put(endpoint,  headers=self._auth_header, data=data)
+            resp = requests.put(endpoint,  headers=self._auth_header, json=song_ids)
             
             if not resp.ok:
-                self._logger.exception(
+                self._logger.error(
                         f"Failed to add songs to Spotify"
                         f" errcode={resp.status_code}"
                         f" errmsg={resp.content}"
