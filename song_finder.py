@@ -54,7 +54,7 @@ class SongFinder:
 
         if song:
             self._logger.debug(f"""{query_song} found at {song["external_urls"]["spotify"]}""")
-            self._browser_messenger.song_found(str(query_song), exact, song["external_urls"]["spotify"])
+            self._browser_messenger.song_found(query_song, exact, song["external_urls"]["spotify"])
 
         return song
 
