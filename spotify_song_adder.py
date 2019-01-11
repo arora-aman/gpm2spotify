@@ -3,8 +3,8 @@ import requests
 
 
 class SpotifyAdder:
-    def __init__(self, auth_header):
-        self._auth_header = auth_header
+    def __init__(self, spotify_user):
+        self._spotify_user = spotify_user
         self._logger = logging.getLogger("gpm2spotify")
 
 
@@ -14,18 +14,4 @@ class SpotifyAdder:
         """
         endpoint = "https://api.spotify.com/v1/me/tracks"
 
-        try:
-            resp = requests.put(endpoint,  headers=self._auth_header, json=song_ids)
-            
-            if not resp.ok:
-                self._logger.error(
-                        f"Failed to add songs to Spotify"
-                        f" errcode={resp.status_code}"
-                        f" errmsg={resp.content}"
-                    )
-                
-                return False
-
-            return True
-        except Exception:
-            self._logger.exception("Failed to make request to add songs")
+        return self._spotify_user.make_request("PUT", endpoint, json=song_ids) is not None

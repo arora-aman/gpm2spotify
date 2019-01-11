@@ -13,7 +13,7 @@ class Gpm2Spotify:
         print("Parser created")
         self._filepath = "/Users/aman23091998/Downloads/Takeout/Google Play Music"
         self._song_finder = song_finder.SongFinder(spotify_app)
-        self._spotify_adder = spotify_song_adder.SpotifyAdder(spotify_user.authorization_header())
+        self._spotify_adder = spotify_song_adder.SpotifyAdder(spotify_user)
         self._parser_lock = threading.Lock()
         self._gpm_file_parser = gpm_file_parser.GpmFileParser()
         self._logger = logging.getLogger("gpm2spotify")

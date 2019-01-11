@@ -29,12 +29,14 @@ class SpotifyClient:
 
         return headers
 
-    def make_request(self, method, endpoint, headers=None, data=None):
+    def make_request(self, method, endpoint, headers=None, data=None, json_data=None):
         """Helper to abstract making HTTP request and error handling
         :param method: String, "GET" or "PUT" or "POST" or "PATCH"
         :param endpoint: String, endpoint to make the request
         :param headers: Dictionary, headers passed with the request
-        :param data: Dictionary, data to me appeneded to the request
+        :param data: Dictionary, data to be appeneded to the request
+        :returns: Dictoniary, response; None if non 2XX status or if making request failed
+        :note: Use `response is not None` to check for success in case on empty response
         """
         method_to_function = {
             "GET": requests.get,
@@ -44,12 +46,12 @@ class SpotifyClient:
         }
 
         try:
-            resp = method_to_function[method](endpoint, headers=headers, data=data)
+            resp = method_to_function[method](endpoint, headers=headers, data=data, json=json_data)
 
             if not resp.ok:
                 if resp.status_code == 429:
                     time.sleep(int(resp.headers["Retry-After"]))
-                    return self.make_request(method, endpoint, headers, data)
+                    return self.make_request(method, endpoint, headers, data, json_data)
                 else:
                     self._logger.exception(
                         f"{method} {endpoint} Failed"
@@ -59,7 +61,12 @@ class SpotifyClient:
                     )
                 return None
 
-            return json.loads(resp.content.decode())
+            content = resp.content.decode()
+            if not content:
+                return dict()
+            else:
+                return json.loads(content)
+
         except Exception:
             self._logger.exception(f"{method} {endpoint} Failed data={data}")
 
@@ -84,7 +91,7 @@ class SpotifyUser:
 
         return headers
 
-    def make_request(self, method, endpoint, data=None):
+    def make_request(self, method, endpoint, data=None, json=None):
         """Makes a request with user authorisation
         :param method: String, "GET" or "PUT" or "POST" or "PATCH"
         :param endpoint: String, endpoint to make the request
@@ -97,7 +104,7 @@ class SpotifyUser:
             "Authorization": f"Bearer {self._access_token}"
         }
 
-        return self._client.make_request(method, endpoint, headers, data)
+        return self._client.make_request(method, endpoint, headers, data, json)
 
     def get_access_token(self):
         """Gets a new access token from spotify for accessing user data
@@ -170,7 +177,7 @@ class SpotifApplication:
         return headers
 
 
-    def make_request(self, method, endpoint, data=None):
+    def make_request(self, method, endpoint, data=None, json=None):
         """Makes a request to unscoped data
         :param method: String, "GET" or "PUT" or "POST" or "PATCH"
         :param endpoint: String, endpoint to make the request
@@ -183,7 +190,7 @@ class SpotifApplication:
             "Authorization": f"Bearer {self._access_token}"
         }
 
-        return self._client.make_request(method, endpoint, headers, data)
+        return self._client.make_request(method, endpoint, headers, data, json)
 
     def get_access_token(self):
         """Gets a new access token from spotify for the unscoped data
