@@ -55,7 +55,7 @@ class Gpm2Spotify:
 
         read_queue = queue.Queue() # Files read from tracks_filepath
 
-        thread_count = 2 # Anything greater gets rate limited by Spotify
+        thread_count = 10
 
         threads = []
 
@@ -74,6 +74,9 @@ class Gpm2Spotify:
 
         for x in range(thread_count):
             read_queue.put(None)
+
+        for x in range(thread_count):
+            threads[x].join()
 
 
     def _post_library(self, song_ids_list):
