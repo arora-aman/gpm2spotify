@@ -1,6 +1,7 @@
 import json
 import logging
 import requests
+import urllib.parse
 
 
 class SongFinder:
@@ -20,11 +21,13 @@ class SongFinder:
 
         """
         spotify_get_song_info_endpoint = "https://api.spotify.com/v1/search"
-        query = f"{query_track} {query_album} {query_artist}&type=track&limit=1"
+        query = f"{query_track} {query_album} {query_artist}"
+
+        encoded_query = urllib.parse.quote(query)
 
         resp = self._spotify_app.make_request(
                 "GET",
-                spotify_get_song_info_endpoint + "?q=" + query,
+                spotify_get_song_info_endpoint + "?q=" + encoded_query + "&type=track&limit=1",
             )
 
         if not resp:
@@ -57,7 +60,6 @@ class SongFinder:
         return song
 
 
-
     def _get_song(self, query_song):
         """Searches for a specific song on spotify
         :param query_song: Song, Song to be searched for
@@ -68,9 +70,9 @@ class SongFinder:
         if query_song in self._songs:
             return self._songs[query_song]["song"]
 
-        query_track = f"{query_song.title}"
-        query_album = f"album:{query_song.album}"
-        query_artist = f"artist:{query_song.artist}"
+        query_track = f"\"{query_song.title}\""
+        query_album = f"album:\"{query_song.album}\""
+        query_artist = f"artist:\"{query_song.artist}\""
 
         song = self._search_song(query_track, query_album, query_artist)
 
