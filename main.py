@@ -18,7 +18,7 @@ def config_logger():
             datefmt="%Y-%m-%d %H:%M:%S",
             )
 
-    file_handler = logging.FileHandler("gpm2spotify.log")
+    file_handler = logging.FileHandler("gpm2spotify.log", "w")
     file_handler.setFormatter(formatter)
     file_handler.setLevel(logging.INFO)
 
