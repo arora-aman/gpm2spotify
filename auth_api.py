@@ -34,6 +34,15 @@ def on_authenticated():
 
     on_success = """
     <html>
+        <script>
+            const socket = new WebSocket('ws://localhost:8002');
+
+            // Listen for messages
+            socket.addEventListener('message', function (event) {
+                console.log('Message from server ', event.data);
+            });
+        </script>
+
         <body>
             Doing work now!
         </body>
