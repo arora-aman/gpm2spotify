@@ -4,8 +4,8 @@ import requests
 
 
 class SongFinder:
-    def __init__(self, authorization_header):
-        self._auth_header = authorization_header
+    def __init__(self, spotify_application):
+        self._spotify_app = spotify_application
         self._songs = dict()
         self._logger = logging.getLogger("gpm2spotify")
 
@@ -22,26 +22,20 @@ class SongFinder:
         spotify_get_song_info_endpoint = "https://api.spotify.com/v1/search"
         query = f"{query_track} {query_album} {query_artist}&type=track&limit=1"
 
-        try:
-            resp = requests.get(spotify_get_song_info_endpoint + "?q=" + query, headers=self._auth_header)
+        resp = self._spotify_app.make_request(
+                "GET",
+                spotify_get_song_info_endpoint + "?q=" + query,
+            )
 
-            if not resp.ok:
-                self._logger.error(
-                        f"Query={query} failed"
-                        f" errcode={resp.status_code}"
-                        f" errmsg={resp.content}"
-                    )
-                return
+        if not resp:
+            return
 
-            output = json.loads(resp.content.decode())
-            songs = output["tracks"]["items"]
+        songs = resp["tracks"]["items"]
 
-            if len(songs) > 0:
-                return songs[0]
+        if len(songs) > 0:
+            return songs[0]
 
-            self._logger.debug(f"Song not found for query={query}")
-        except Exception as e:
-            self._logger.exception(f"query={query} failed")
+        self._logger.debug(f"Song not found for query={query}")
 
 
     def _get_song(self, query_song):
