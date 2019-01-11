@@ -1,4 +1,6 @@
 import client
+import gpm2spotify
+import threading
 
 from flask import Blueprint, current_app, jsonify, redirect, request, url_for
 
@@ -9,6 +11,13 @@ spotify_client = None
 spotify_user = None
 spotify_app = None
 
+def start_parser():
+    global spotify_user
+    global spotify_app
+
+    parser = gpm2spotify.Gpm2Spotify("", spotify_app, spotify_user)
+    parser.parse_library()
+
 @auth_api.route("/on_auth", methods=["GET"])
 def on_authenticated():
     """Endpoint to receive spotify authentication redirect
@@ -18,6 +27,9 @@ def on_authenticated():
             args["code"] if "code" in args else None,
             args["error"] if "error" in args else None,
         )
+
+    if success:
+       start_parser()
 
     on_success = """
     <html>
@@ -35,7 +47,7 @@ def on_authenticated():
             </body>
 
     """, 403
-    
+
     return on_success if success else on_failure
 
 
@@ -64,7 +76,7 @@ def login_create():
     global spotify_client
     global spotify_user
     global spotify_app
-    
+
     spotify_client = client.SpotifyClient(request.form["client_id"], request.form["client_secret"])
 
     spotify_app = client.SpotifApplication(spotify_client)

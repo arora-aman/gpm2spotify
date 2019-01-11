@@ -1,4 +1,3 @@
-import asyncio
 import gpm_file_parser
 import json
 import logging
@@ -10,11 +9,12 @@ import threading
 
 
 class Gpm2Spotify:
-    def __init__(self, filepath="", authorization_header=""):
+    def __init__(self, filepath="", spotify_app=None, spotify_user=None):
+        print("Parser created")
         self._filepath = "/Users/aman23091998/Downloads/Takeout/Google Play Music"
-        self._song_finder = song_finder.SongFinder(authorization_header)
-        self._spotify_adder = spotify_song_adder.SpotifyAdder(authorization_header)
-        self._parser_lock = asyncio.Lock()
+        self._song_finder = song_finder.SongFinder(spotify_app.authorization_header())
+        self._spotify_adder = spotify_song_adder.SpotifyAdder(spotify_user.authorization_header())
+        self._parser_lock = threading.Lock()
         self._gpm_file_parser = gpm_file_parser.GpmFileParser()
         self._logger = logging.getLogger("gpm2spotify")
 
@@ -31,7 +31,7 @@ class Gpm2Spotify:
             if len(song_ids) == 50:
                 add_to_spotify(song_ids)
                 song_ids = []
-            
+
             song = read_queue.get()
 
             if not song:
@@ -46,7 +46,7 @@ class Gpm2Spotify:
         add_to_spotify(song_ids)
 
 
-    async def _parse_song_files(self, tracks_filepath, add_to_spotify):
+    def _parse_song_files(self, tracks_filepath, add_to_spotify):
         """Reads songs from Google Takeout and adds them to spotify
         :param tracks_filepath: Path to songs that need to be added
         :param add_to_spotify: Function(ids), Add upto 50 ids to spotify. Function handles
@@ -58,28 +58,23 @@ class Gpm2Spotify:
 
         thread_count = 2 # Anything greater gets rate limited by Spotify
 
-        loop = asyncio.get_event_loop()
-        futures = [
-                loop.run_in_executor(
-                    None,
-                    self._add_songs_to_spotify_thread,
-                    read_queue,
-                    add_to_spotify
-                    )
+        threads = []
 
-                    for x in range(thread_count)
-                ]
+        for x in range(thread_count):
+            threads.append(
+                    threading.Thread(target=self._add_songs_to_spotify_thread, args=(read_queue, add_to_spotify))
+                )
+
+        for x in range(thread_count):
+            threads[x].start()
 
         for file in files:
              read_queue.put(
                      self._gpm_file_parser.parse_file(os.path.join(tracks_filepath, file))
-                     )
+                    )
 
         for x in range(thread_count):
             read_queue.put(None)
-
-        for response in await asyncio.gather(*futures):
-            pass
 
 
     def _post_library(self, song_ids_list):
@@ -97,11 +92,12 @@ class Gpm2Spotify:
             self._logger.error(f"Failed to add {len(song_ids_list)} to library")
 
 
-    async def parse_library(self):
+    def parse_library(self):
         """Adds songs from GPM to spotify library
         """
         tracks_filepath = self._filepath + "/Playlists/Thumbs Up/"
 
-        async with self._parser_lock:
-            await self._parse_song_files(tracks_filepath, self._post_library)
+        self._parser_lock.acquire()
+        self._parse_song_files(tracks_filepath, self._post_library)
+        self._parser_lock.release()
 

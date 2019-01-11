@@ -26,7 +26,7 @@ class SongFinder:
             resp = requests.get(spotify_get_song_info_endpoint + "?q=" + query, headers=self._auth_header)
 
             if not resp.ok:
-                self._logger.debug(
+                self._logger.error(
                         f"Query={query} failed"
                         f" errcode={resp.status_code}"
                         f" errmsg={resp.content}"

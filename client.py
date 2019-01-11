@@ -69,6 +69,16 @@ class SpotifyUser:
         self._logger = logging.getLogger("gpm2spotify")
 
 
+    def authorization_header(self):
+        if not self._access_token:
+            raise RuntimeError("User access token not found")
+
+        headers = {
+            "Authorization": f"Bearer {self._access_token}"
+        }
+
+        return headers
+
     def make_request(self, method, endpoint, data=None):
         """Makes a request with user authorisation
         :param method: String, "GET" or "PUT" or "POST" or "PATCH"
@@ -142,6 +152,18 @@ class SpotifApplication:
     def __init__(self, spotify_client):
         self._client = spotify_client
         self._logger = logging.getLogger("gpm2spotify")
+
+
+    def authorization_header(self):
+        if not self._access_token:
+            raise RuntimeError("User access token not found")
+
+        headers = {
+            "Authorization": f"Bearer {self._access_token}"
+        }
+
+        return headers
+
 
     def make_request(self, method, endpoint, data=None):
         """Makes a request to unscoped data
