@@ -37,6 +37,26 @@ class SongFinder:
 
         self._logger.debug(f"Song not found for query={query}")
 
+    def _add_song_to_dict(self, query_song, song, exact=True):
+        """Memoize same song search result
+        :param query_song: Song, song object searched
+        :param song: JSON Object, object returned after the query
+        :param exact: Bool, true if title, album and artist of the query and result match
+
+        :return: JSON Object, returns the query result back
+        """
+
+        self._songs[query_song] = {
+                "song": song,
+                "exact": exact,
+        }
+
+        if song:
+            self._logger.debug(f"""{query_song} found at {song["external_urls"]["spotify"]}""")
+
+        return song
+
+
 
     def _get_song(self, query_song):
         """Searches for a specific song on spotify
@@ -55,34 +75,19 @@ class SongFinder:
         song = self._search_song(query_track, query_album, query_artist)
 
         if song:
-            self._songs[query_song] = {
-                    "song": song,
-                    "exact": True,
-            }
-            return song
+            return self._add_song_to_dict(query_song, song)
 
         song =  self._search_song(query_track, query_album=query_album)
 
         if song:
-            self._songs[query_song] = {
-                    "song": song,
-                    "exact": False,
-            }
-            return song
+            return self._add_song_to_dict(query_song, song, False)
 
         song =  self._search_song(query_track, query_artist=query_artist)
 
         if song:
-            self._songs[query_song] = {
-                    "song": song,
-                    "exact": False,
-            }
-            return song
+            return self._add_song_to_dict(query_song, song, False)
 
-        self._songs[query_song] = {
-                "song": None,
-                "exact": False,
-        }
+        self._add_song_to_dict(query_song, None, False)
 
         self._logger.error(f"Couldn't find {query_song} on Spotify")
 
