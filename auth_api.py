@@ -2,8 +2,12 @@ import client
 import gpm2spotify
 import threading
 
+from browser_messenger import BrowserMessenger
 from flask import Blueprint, current_app, jsonify, redirect, request, url_for
 
+
+BROWSER_MESSENGER_HOST = "127.0.0.1"
+BROWSER_MESSENGER_PORT = 8001
 
 auth_api = Blueprint("auth", __name__, url_prefix="")
 
@@ -11,11 +15,19 @@ spotify_client = None
 spotify_user = None
 spotify_app = None
 
+browser_messenger = BrowserMessenger(
+        BROWSER_MESSENGER_HOST,
+        BROWSER_MESSENGER_PORT,
+    )
+
+browser_messenger.run_in_background()
+
 def start_parser():
     global spotify_user
     global spotify_app
 
-    parser = gpm2spotify.Gpm2Spotify("", spotify_app, spotify_user)
+
+    parser = gpm2spotify.Gpm2Spotify("", spotify_app, spotify_user, browser_messenger)
     parser.parse_library()
 
 @auth_api.route("/on_auth", methods=["GET"])
@@ -32,15 +44,15 @@ def on_authenticated():
         parser_thread = threading.Thread(target=start_parser)
         parser_thread.start()
 
-    on_success = """
+    on_success = f"""
     <html>
         <script>
-            const socket = new WebSocket('ws://localhost:8002');
+            const socket = new WebSocket('ws://{BROWSER_MESSENGER_HOST}:{BROWSER_MESSENGER_PORT}');
 
             // Listen for messages
-            socket.addEventListener('message', function (event) {
-                console.log('Message from server ', event.data);
-            });
+            socket.addEventListener('message', function (event) {{
+                console.log(JSON.parse(event.data));
+            }});
         </script>
 
         <body>

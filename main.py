@@ -1,5 +1,4 @@
 import auth_api
-import browser_messenger
 import logging
 
 from flask import Flask
@@ -23,14 +22,9 @@ def config_logger():
     file_handler.setFormatter(formatter)
     file_handler.setLevel(logging.INFO)
 
-    browser_handler = browser_messenger.BrowserMessenger("127.0.0.1", 8002)
-    browser_handler.setLevel(logging.DEBUG)
-
-    logger = logging.getLogger("gpm2spotify")
-    logger.handlers = [file_handler, browser_handler,]
-    logger.setLevel(logging.DEBUG)
-
-    browser_handler.run_in_background()
+    app_logger = logging.getLogger("gpm2spotify")
+    app_logger.handlers = [file_handler,]
+    app_logger.setLevel(logging.INFO)
 
 def main():
     config_logger()

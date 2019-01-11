@@ -9,14 +9,15 @@ import threading
 
 
 class Gpm2Spotify:
-    def __init__(self, filepath="", spotify_app=None, spotify_user=None):
+    def __init__(self, filepath="", spotify_app=None, spotify_user=None, browser_messenger = None):
         print("Parser created")
         self._filepath = "/Users/aman23091998/Downloads/Takeout/Google Play Music"
-        self._song_finder = song_finder.SongFinder(spotify_app)
+        self._song_finder = song_finder.SongFinder(spotify_app, browser_messenger)
         self._spotify_adder = spotify_song_adder.SpotifyAdder(spotify_user)
         self._parser_lock = threading.Lock()
         self._gpm_file_parser = gpm_file_parser.GpmFileParser()
         self._logger = logging.getLogger("gpm2spotify")
+        self._browser_messenger = browser_messenger
 
 
     def _add_songs_to_spotify_thread(self, read_queue, add_to_spotify):
@@ -97,8 +98,10 @@ class Gpm2Spotify:
 
             if  self._spotify_adder.add_to_library(song_ids_list[song_count - selected: song_count -1]):
                 self._logger.info(f"Added {selected} songs to library")
+                self._browser_messenger.songs_added("Library", selected)
             else:
                 self._logger.error(f"Failed to add {song_count} to library")
+                self._browser_messenger.songs_add_failed("Library", selected)
 
             song_count -= selected
 

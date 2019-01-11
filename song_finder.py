@@ -5,11 +5,11 @@ import urllib.parse
 
 
 class SongFinder:
-    def __init__(self, spotify_application):
+    def __init__(self, spotify_application, browser_messenger = None):
         self._spotify_app = spotify_application
         self._songs = dict()
         self._logger = logging.getLogger("gpm2spotify")
-
+        self._browser_messenger = browser_messenger
 
     def _search_song(self, query_track, query_album="", query_artist=""):
         """Runs a specific track, albim and artist query
@@ -56,6 +56,7 @@ class SongFinder:
 
         if song:
             self._logger.debug(f"""{query_song} found at {song["external_urls"]["spotify"]}""")
+            self._browser_messenger.song_found(str(query_song), exact, song["external_urls"]["spotify"])
 
         return song
 
@@ -92,6 +93,7 @@ class SongFinder:
         self._add_song_to_dict(query_song, None, False)
 
         self._logger.error(f"Couldn't find {query_song} on Spotify")
+        self._browser_messenger.song_not_found(query_song)
 
 
     def get_song_id(self, song):
