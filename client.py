@@ -3,6 +3,7 @@ import json
 import logging
 import requests
 import threading
+import time
 import webbrowser
 
 
@@ -46,7 +47,11 @@ class SpotifyClient:
             resp = method_to_function[method](endpoint, headers=headers, data=data)
 
             if not resp.ok:
-                self._logger.exception(
+                if resp.status_code == 429:
+                    time.sleep(int(resp.headers["Retry-After"]))
+                    return self.make_request(method, endpoint, headers, data)
+                else:
+                    self._logger.exception(
                         f"{method} {endpoint} Failed"
                         f" data={data}"
                         f" errcode={resp.status_code}"
