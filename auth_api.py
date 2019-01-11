@@ -84,7 +84,7 @@ def login_create():
     valid_client_creds = spotify_app.get_access_token()
 
     if not valid_client_creds:
-        return """
+        return f"""
         <html>
             <body>
                 An error occured, make sure that the credentials are correct <br />
