@@ -22,7 +22,7 @@ class SpotifyAdder:
         :return: JSON Object, created playlist object
         """
 
-        user_id = None # get user id
+        user_id = self._spotify_user.user_id
         endpoint = f"https://api.spotify.com/v1/users/{user_id}/playlists"
 
         json = {

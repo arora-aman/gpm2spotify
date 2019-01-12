@@ -97,17 +97,38 @@ class SpotifyUser:
     def get_access_token_url(self):
         """Returns the endpoint used to Get a new access token from spotify for accessing user data
         """
-        scopes = "playlist-modify-private playlist-modify-public user-library-modify"
+        scopes = "playlist-modify-private playlist-modify-public user-library-modify user-read-private"
 
         auth_endpoint = "https://accounts.spotify.com/authorize"
         query = f"client_id={self._client.client_id}&response_type=code&redirect_uri={self._flask_server}/on_auth&scope={scopes}"
 
         return f"{auth_endpoint}?{query}"
 
+    def get_user_id(self):
+        """Request spotify for the user's id
+        :return: Bool, True if successfully read user's id
+        """
+
+        endpoint = "https://api.spotify.com/v1/me"
+        resp = self.make_request("GET", endpoint)
+
+        if not resp:
+            self._logger.error("Failed to read user id")
+            return False
+
+        self._user_id = resp["id"]
+
+        return True
+
+
+    @property
+    def user_id(self):
+        return self._user_id
+
 
     def on_auth_request_return(self, code=None, error=None):
         """Handles response from spotify authorization request
-        :return: Bool, True if the user was comepletely authenicated
+        :return: Bool, True if the user was comepletely authenticated
         """
         if not code:
             self._logger.error(f"User authorization request failed: {error}")

@@ -40,6 +40,11 @@ def on_authenticated():
             args["error"] if "error" in args else None,
         )
 
+    if not success:
+        return on_failure
+
+    success = spotify_user.get_user_id()
+
     if success:
         parser_thread = threading.Thread(target=start_parser)
         parser_thread.start()
@@ -70,7 +75,7 @@ def on_authenticated():
 
     """, 403
 
-    return on_success if success else on_failure
+    return on_success
 
 
 @auth_api.route("/login", methods=["GET"])
