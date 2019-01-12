@@ -115,12 +115,4 @@ def login_create():
         """, 401
 
     spotify_user = client.SpotifyUser(spotify_client, "http://localhost:8000")
-    spotify_user.get_access_token()
-
-    return"""
-    <html>
-        <body>
-            Contacting Spotify for your info!
-        </body>
-    </html>
-    """, 200
+    return redirect(spotify_user.get_access_token_url(), code=302)

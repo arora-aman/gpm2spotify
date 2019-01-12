@@ -2,7 +2,6 @@ import base64
 import json
 import logging
 import requests
-import threading
 import time
 import webbrowser
 
@@ -74,7 +73,6 @@ class SpotifyClient:
 class SpotifyUser:
     def __init__(self, spotify_client, flask_server):
         self._client = spotify_client
-        self._auth_wait_sem = threading.Semaphore(0)
         self._flask_server = flask_server
 
         self._access_token = ""
@@ -96,16 +94,15 @@ class SpotifyUser:
 
         return self._client.make_request(method, endpoint, headers, data, json)
 
-    def get_access_token(self):
-        """Gets a new access token from spotify for accessing user data
+    def get_access_token_url(self):
+        """Returns the endpoint used to Get a new access token from spotify for accessing user data
         """
         scopes = "playlist-modify-private playlist-modify-public user-library-modify"
 
         auth_endpoint = "https://accounts.spotify.com/authorize"
         query = f"client_id={self._client.client_id}&response_type=code&redirect_uri={self._flask_server}/on_auth&scope={scopes}"
 
-        webbrowser.open(auth_endpoint + "?" + query)
-        self._auth_wait_sem.acquire()
+        return f"{auth_endpoint}?{query}"
 
 
     def on_auth_request_return(self, code=None, error=None):
@@ -114,12 +111,10 @@ class SpotifyUser:
         """
         if not code:
             self._logger.error(f"User authorization request failed: {error}")
-            self._auth_wait_sem.release()
             return False
 
         self._auth_code = code
         success = self._get_access_token_from_auth_code()
-        self._auth_wait_sem.release()
 
         return success
 
