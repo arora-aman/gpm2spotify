@@ -59,11 +59,9 @@ class Gpm2Spotify:
                                library or playlist.
         """
         files = os.listdir(tracks_filepath)
-
         read_queue = queue.Queue() # Files read from tracks_filepath
 
         thread_count = 10
-
         threads = []
 
         for x in range(thread_count):
@@ -75,9 +73,11 @@ class Gpm2Spotify:
             threads[x].start()
 
         for file in files:
-             read_queue.put(
-                     self._gpm_file_parser.parse_file(os.path.join(tracks_filepath, file))
-                    )
+            song = self._gpm_file_parser.parse_file(os.path.join(tracks_filepath, file))
+            if not song.title:
+                continue
+
+            read_queue.put(song)
 
         for x in range(thread_count):
             read_queue.put(None)
