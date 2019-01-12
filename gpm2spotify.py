@@ -9,15 +9,21 @@ import threading
 
 
 class Gpm2Spotify:
-    def __init__(self, filepath="", spotify_app=None, spotify_user=None, browser_messenger = None):
-        print("Parser created")
+    def __init__(self,
+            filepath="",
+            spotify_app=None,
+            spotify_user=None,
+            thumbs_up_is_library=True,
+            browser_messenger = None):
         self._filepath = "/Users/aman23091998/Downloads/Takeout/Google Play Music"
         self._song_finder = song_finder.SongFinder(spotify_app, browser_messenger)
         self._spotify_adder = spotify_song_adder.SpotifyAdder(spotify_user)
+        self._thumbs_up_is_library = thumbs_up_is_library
+        self._browser_messenger = browser_messenger
+
         self._parser_lock = threading.Lock()
         self._gpm_file_parser = gpm_file_parser.GpmFileParser()
         self._logger = logging.getLogger("gpm2spotify")
-        self._browser_messenger = browser_messenger
 
 
     def _add_songs_to_spotify_thread(self, read_queue, add_to_spotify):
@@ -108,9 +114,40 @@ class Gpm2Spotify:
     def parse_library(self):
         """Adds songs from GPM to spotify library
         """
-        tracks_filepath = self._filepath + "/Playlists/Thumbs Up/"
+        if self._thumbs_up_is_library:
+            tracks_filepath = self._filepath + "/Playlists/Thumbs Up/"
 
         self._parser_lock.acquire()
         self._parse_song_files(tracks_filepath, self._post_library)
         self._parser_lock.release()
 
+    def _post_playlist(self, id, song_ids):
+        """Adds songs to a Spotify Playlist
+        :param id: String, Spotify ID of the Playlist
+        :param song_ids_list: Array of ids, (Max 50) ids of songs that need to be added to the library
+        """
+        # post upto 50 songs
+        return
+
+    def _parse_playlist(self, name, playlist_file_path):
+        # Create Playlist
+
+        tracks_filepath = playlist_file_path + ("/Tracks" if name is not "Thumbs Up" else "")
+        print(name, tracks_filepath)
+
+    def parse_playlists(self):
+        """Adds playlists from GPM to Spotify
+        """
+        playlists_filepath = self._filepath + "/Playlists"
+
+        self._parser_lock.acquire()
+
+        playlists = os.listdir(playlists_filepath)
+
+        if self._thumbs_up_is_library and "Thumbs Up" in playlists:
+            playlists.remove("Thumbs Up")
+
+        for playlist in playlists:
+            self._parse_playlist(playlist, playlists_filepath + f"/{playlist}")
+
+        self._parser_lock.release()

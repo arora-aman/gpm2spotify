@@ -27,8 +27,8 @@ def start_parser():
     global spotify_app
 
 
-    parser = gpm2spotify.Gpm2Spotify("", spotify_app, spotify_user, browser_messenger)
-    parser.parse_library()
+    parser = gpm2spotify.Gpm2Spotify("", spotify_app, spotify_user, True, browser_messenger)
+    parser.parse_playlists()
 
 @auth_api.route("/on_auth", methods=["GET"])
 def on_authenticated():
