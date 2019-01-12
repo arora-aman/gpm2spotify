@@ -1,3 +1,4 @@
+import functools
 import gpm_file_parser
 import json
 import logging
@@ -121,13 +122,21 @@ class Gpm2Spotify:
         self._parse_song_files(tracks_filepath, self._post_library)
         self._parser_lock.release()
 
-    def _post_playlist(self, id, song_ids):
+    def _post_playlist(self, name, id, song_ids):
         """Adds songs to a Spotify Playlist
         :param id: String, Spotify ID of the Playlist
         :param song_ids_list: Array of ids, (Max 50) ids of songs that need to be added to the library
         """
-        # post upto 50 songs
-        return
+
+        if len(song_ids) < 1:
+            return
+
+        if self._spotify_adder.add_songs_to_playlist(id, song_ids):
+            self._logger.info(f"{len(song_ids)} songs added to Playlist {name}")
+            self._browser_messenger.songs_added(f"Playlist {name}", len(song_ids))
+        else:
+            self._logger.error(f"Failed to add {len(song_ids)} songs to Playlist {name}")
+            self._browser_messenger.songs_add_failed(f"Playlist {name}", len(song_ids))
 
     def _parse_playlist(self, name, playlist_file_path):
         resp = self._spotify_adder.create_playlist(name)
@@ -141,14 +150,17 @@ class Gpm2Spotify:
             return
 
         tracks_filepath = playlist_file_path + ("/Tracks" if name is not "Thumbs Up" else "")
-        print(name, tracks_filepath)
+        self._parse_song_files(
+                tracks_filepath,
+                functools.partial(self._post_playlist, name, resp["id"]),
+            )
 
     def parse_playlists(self):
         """Adds playlists from GPM to Spotify
         """
-        playlists_filepath = self._filepath + "/Playlists"
-
         self._parser_lock.acquire()
+
+        playlists_filepath = self._filepath + "/Playlists"
 
         playlists = os.listdir(playlists_filepath)
 
