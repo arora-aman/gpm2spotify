@@ -4,7 +4,7 @@ import logging
 import os
 import queue
 import song_finder
-import spotify_song_adder
+import spotify_adder
 import threading
 
 
@@ -17,7 +17,7 @@ class Gpm2Spotify:
             browser_messenger = None):
         self._filepath = "/Users/aman23091998/Downloads/Takeout/Google Play Music"
         self._song_finder = song_finder.SongFinder(spotify_app, browser_messenger)
-        self._spotify_adder = spotify_song_adder.SpotifyAdder(spotify_user)
+        self._spotify_adder = spotify_adder.SpotifyAdder(spotify_user)
         self._thumbs_up_is_library = thumbs_up_is_library
         self._browser_messenger = browser_messenger
 
