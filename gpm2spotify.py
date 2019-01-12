@@ -130,7 +130,15 @@ class Gpm2Spotify:
         return
 
     def _parse_playlist(self, name, playlist_file_path):
-        # Create Playlist
+        resp = self._spotify_adder.create_playlist(name)
+
+        if resp:
+            self._logger.info(f"Created playlist {name}")
+            self._browser_messenger.playlist_created(name, resp["external_urls"]["spotify"])
+        else:
+            self._logger.error(f"Failed to created playlist {name}")
+            self._browser_messenger.playlist_create_failed(name)
+            return
 
         tracks_filepath = playlist_file_path + ("/Tracks" if name is not "Thumbs Up" else "")
         print(name, tracks_filepath)

@@ -103,6 +103,36 @@ class BrowserMessenger():
         self._log_queue.put(json.dumps(message))
 
 
+    def playlist_created(self, name, uri):
+        """Log successful creation of a playlist
+        :param name: Name of the playlist
+        :param uri: String, Spotify link to the playlist
+        """
+        message = {
+            "timestamp": self._get_time(),
+            "level": "INFO",
+            "type": "PLAYLIST_CREATED",
+            "name": name,
+            "uri":  uri,
+        }
+
+        self._log_queue.put(json.dumps(message))
+
+
+    def playlist_create_failed(self, name):
+        """Log unsuccessful attempt at creating  a playlist
+        :param name: Name of the playlist
+        """
+        message = {
+            "timestamp": self._get_time(),
+            "level": "ERROR",
+            "type": "PLAYLIST_CREATE_FAILED",
+            "name": name,
+        }
+
+        self._log_queue.put(json.dumps(message))
+
+
     async def _log_message(self, socket, request_uri):
         while True:
             record = self._log_queue.get()

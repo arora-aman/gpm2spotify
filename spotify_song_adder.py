@@ -15,3 +15,19 @@ class SpotifyAdder:
         endpoint = "https://api.spotify.com/v1/me/tracks"
 
         return self._spotify_user.make_request("PUT", endpoint, json=song_ids) is not None
+
+    def create_playlist(self, name, public=False):
+        """Creates a new playlist
+        :param name: String, Name of the playlist
+        :return: JSON Object, created playlist object
+        """
+
+        user_id = None # get user id
+        endpoint = f"https://api.spotify.com/v1/users/{user_id}/playlists"
+
+        json = {
+            "name": name,
+            "public": public
+        }
+
+        return self._spotify_user.make_request("POST", endpoint, json=json)
