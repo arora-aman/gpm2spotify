@@ -54,12 +54,12 @@ class SongFinder:
 
         if song:
             self._logger.debug(f"""{query_song} found at {song["external_urls"]["spotify"]}""")
-            self._browser_messenger.song_found(query_song, exact, song["external_urls"]["spotify"])
+            self._browser_messenger.song_found(query_song, song, exact)
 
         return song
 
 
-    def _get_song(self, query_song):
+    def get_song(self, query_song):
         """Searches for a specific song on spotify
         :param query_song: Song, Song to be searched for
 
@@ -99,7 +99,7 @@ class SongFinder:
 
         :returns: JSON Object, The ID of the song with the closest match
         """
-        result = self._get_song(song)
+        result = self.get_song(song)
 
         if result:
             return result["id"]

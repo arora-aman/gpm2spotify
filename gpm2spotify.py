@@ -33,24 +33,24 @@ class Gpm2Spotify:
         :param add_to_spotify: Function(ids), Add upto 50 ids to spotify. Function handles
                                library or playlist.
         """
-        song_ids = []
+        songs = []
 
         while True:
-            if len(song_ids) == 50:
-                add_to_spotify(song_ids)
-                song_ids = []
+            if len(songs) == 50:
+                add_to_spotify(songs)
+                songs = []
 
             song = read_queue.get()
 
             if not song:
                 break
 
-            id = self._song_finder.get_song_id(song)
+            search_result = self._song_finder.get_song(song)
 
-            if id:
-                song_ids.append(id)
+            if search_result and "id" in search_result:
+                songs.append(search_result)
 
-        add_to_spotify(song_ids)
+        add_to_spotify(songs)
 
 
     def _parse_song_files(self, tracks_filepath, add_to_spotify):
@@ -87,12 +87,11 @@ class Gpm2Spotify:
             threads[x].join()
 
 
-    def _post_library(self, song_ids_list):
+    def _post_library(self, songs):
         """Adds songs to Spotify Library
-        :param song_ids_list: Array of ids, (Max 50) ids of songs that need to be added to the library
+        :param songs: Array of JSON Objects, (Max 50) songs that need to be added to the library
         """
-
-        song_count = len(song_ids_list)
+        song_count = len(songs)
 
         if song_count == 0:
             return
@@ -103,7 +102,10 @@ class Gpm2Spotify:
         while song_count > 0:
             selected = 50 if song_count >= 50 else song_count
 
-            if  self._spotify_adder.add_to_library(song_ids_list[song_count - selected: song_count -1]):
+            if  self._spotify_adder.add_to_library(
+                    [song["id"]
+                    for song in songs[song_count - selected: song_count -1]]
+                ):
                 self._logger.info(f"Added {selected} songs to library")
                 self._browser_messenger.songs_added("Library", selected)
             else:
@@ -122,14 +124,17 @@ class Gpm2Spotify:
         self._parse_song_files(tracks_filepath, self._post_library)
         self._parser_lock.release()
 
-    def _post_playlist(self, name, id, song_ids):
+    def _post_playlist(self, name, id, songs):
         """Adds songs to a Spotify Playlist
-        :param id: String, Spotify ID of the Playlist
-        :param song_ids_list: Array of ids, (Max 50) ids of songs that need to be added to the library
+        :param name: String, Name of the playlist
+        :param id: String, Spotify ID of the playlist
+        :param songs: Array of JSON Objects, (Max 50) songs that need to be added to the playlist
         """
 
-        if len(song_ids) < 1:
+        if len(songs) < 1:
             return
+
+        song_ids = [ song["id"] for song in songs ]
 
         if self._spotify_adder.add_songs_to_playlist(id, song_ids):
             self._logger.info(f"{len(song_ids)} songs added to Playlist {name}")

@@ -39,19 +39,19 @@ class BrowserMessenger():
         return curr_time.strftime("%Y-%m-%d %H:%M:%S")
 
 
-    def song_found(self, song, exact, uri):
+    def song_found(self, searched_song, result, exact):
         """Log successful song find query to the browser
-        :param song: Song object, The song that was searched
+        :param searched_song: Song object, The song that was searched
+        :param result: JSON Object, The JSON response with the song information
         :param exact: Boolean, If the result has matching title, album AND artist
-        :param uri: String, Spotify link to the song
         """
         message = {
             "timestamp": self._get_time(),
             "level": "INFO",
             "type": "SONG_FOUND",
-            "song": str(song),
+            "searched_song": json.dumps(searched_song.to_dict()),
+            "result": json.dumps(result),
             "exact": exact,
-            "uri": uri,
         }
 
         self._log_queue.put(json.dumps(message))
@@ -65,7 +65,7 @@ class BrowserMessenger():
             "timestamp": self._get_time(),
             "level": "ERROR",
             "type": "SONG_NOT_FOUND",
-            "song": str(song),
+            "song": json.dumps(song.to_dict()),
         }
 
         self._log_queue.put(json.dumps(message))

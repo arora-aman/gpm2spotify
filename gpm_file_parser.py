@@ -30,6 +30,14 @@ class Song:
         return self._album
 
 
+    def to_dict(self):
+        return {
+            "title": self.title,
+            "artist": self.artist,
+            "album": self.album,
+        }
+
+
 class GpmFileParser:
     def __init__(self):
         self._logger = logging.getLogger("gpm2spotify")
@@ -53,10 +61,10 @@ class GpmFileParser:
             song = json.loads(song)[0]
 
             return Song(
-                    html.unescape(song["Title"]), 
-                    html.unescape(song["Artist"]), 
+                    html.unescape(song["Title"]),
+                    html.unescape(song["Artist"]),
                     html.unescape(song["Album"])
                 )
-        
+
         except Exception as e:
             self._logger.exception(f"Can't parse {csv_file}")
