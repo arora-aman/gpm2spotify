@@ -134,14 +134,14 @@ class Gpm2Spotify:
         if len(songs) < 1:
             return
 
-        song_ids = [ song["id"] for song in songs ]
+        song_uris = [ song["uri"] for song in songs ]
 
-        if self._spotify_adder.add_songs_to_playlist(id, song_ids):
-            self._logger.info(f"{len(song_ids)} songs added to Playlist {name}")
-            self._browser_messenger.songs_added(f"Playlist {name}", len(song_ids))
+        if self._spotify_adder.add_songs_to_playlist(id, song_uris):
+            self._logger.info(f"{len(song_uris)} songs added to Playlist {name}")
+            self._browser_messenger.songs_added(f"Playlist {name}", len(song_uris))
         else:
-            self._logger.error(f"Failed to add {len(song_ids)} songs to Playlist {name}")
-            self._browser_messenger.songs_add_failed(f"Playlist {name}", len(song_ids))
+            self._logger.error(f"Failed to add {len(song_uris)} songs to Playlist {name}")
+            self._browser_messenger.songs_add_failed(f"Playlist {name}", len(song_uris))
 
     def _parse_playlist(self, name, playlist_file_path):
         resp = self._spotify_adder.create_playlist(name)
