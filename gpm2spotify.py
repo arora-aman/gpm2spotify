@@ -148,7 +148,7 @@ class Gpm2Spotify:
 
         if resp:
             self._logger.info(f"Created playlist {name}")
-            self._browser_messenger.playlist_created(name, resp["external_urls"]["spotify"])
+            self._browser_messenger.playlist_created(resp)
         else:
             self._logger.error(f"Failed to created playlist {name}")
             self._browser_messenger.playlist_create_failed(name)

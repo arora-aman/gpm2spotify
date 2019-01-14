@@ -103,17 +103,15 @@ class BrowserMessenger():
         self._log_queue.put(json.dumps(message))
 
 
-    def playlist_created(self, name, uri):
+    def playlist_created(self, playlist):
         """Log successful creation of a playlist
-        :param name: Name of the playlist
-        :param uri: String, Spotify link to the playlist
+        :param name: JSON Object, Complete info about the playlist
         """
         message = {
             "timestamp": self._get_time(),
             "level": "INFO",
             "type": "PLAYLIST_CREATED",
-            "name": name,
-            "uri":  uri,
+            "playlist": json.dumps(playlist),
         }
 
         self._log_queue.put(json.dumps(message))
