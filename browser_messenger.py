@@ -71,34 +71,44 @@ class BrowserMessenger():
         self._log_queue.put(json.dumps(message))
 
 
-    def songs_added(self, destination, song_count):
+    def songs_added(self, songs, library=True, playlist=None):
         """Log successful song additions to user's spotify account
-        :param destination: String, Library or Playlist the songs were added to
-        :param song_count: Integer, Number of songs that were added
+        :param songs: Array of JSON Objects, Songs that were added to Spotify
+        :param library: Bool, True if songs were added to the library, False if added to a Playlist
+        :param playlist: JSON Object, Playlist information; ignored if library is True
         """
         message = {
             "timestamp": self._get_time(),
             "level": "INFO",
             "type": "SONGS_ADDED",
-            "dest": destination,
-            "song_count": song_count,
+            "songs": songs,
         }
+
+        if library:
+            message["library"] = library
+        else:
+            message["playlist"] = playlist
 
         self._log_queue.put(json.dumps(message))
 
 
-    def songs_add_failed(self, destination, song_count):
+    def songs_add_failed(self, songs, library=True, playlist=None):
         """Log unsuccessful song additions to user's spotify account
-        :param destination: String, Library or Playlist the songs were being added to
-        :param song_count: Integer, Number of songs that were being added
+        :param songs: Array of JSON Objects, Songs that failed to be added to Spotify
+        :param library: Bool, True if songs were to be added to the library, False if to be added to a Playlist
+        :param playlist: JSON Object, Playlist information; ignored if library is True
         """
         message = {
             "timestamp": self._get_time(),
             "level": "ERROR",
             "type": "SONGS_ADD_FAILED",
-            "dest": destination,
-            "song_count":  song_count,
+            "songs": songs,
         }
+
+        if library:
+            message["library"] = library
+        else:
+            message["playlist"] = playlist
 
         self._log_queue.put(json.dumps(message))
 
