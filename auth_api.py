@@ -34,21 +34,6 @@ def start_parser():
 def on_authenticated():
     """Endpoint to receive spotify authentication redirect
     """
-    args = request.args.to_dict()
-    success = spotify_user.on_auth_request_return(
-            args["code"] if "code" in args else None,
-            args["error"] if "error" in args else None,
-        )
-
-    if not success:
-        return on_failure
-
-    success = spotify_user.get_user_id()
-
-    if success:
-        parser_thread = threading.Thread(target=start_parser)
-        parser_thread.start()
-
     on_success = f"""
     <html>
         <script>
@@ -74,6 +59,21 @@ def on_authenticated():
             </body>
 
     """, 403
+
+    args = request.args.to_dict()
+    success = spotify_user.on_auth_request_return(
+            args["code"] if "code" in args else None,
+            args["error"] if "error" in args else None,
+        )
+
+    if not success:
+        return on_failure
+
+    success = spotify_user.get_user_id()
+
+    if success:
+        parser_thread = threading.Thread(target=start_parser)
+        parser_thread.start()
 
     return on_success
 
