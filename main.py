@@ -30,7 +30,7 @@ def main():
     config_logger()
 
     app.run(host="localhost", port=8000)
-
+    print("Test PR for FK")
 
 if __name__ == "__main__":
     main()
